@@ -1,1 +1,103 @@
-PARTICIPANTS: use this file for creating the class diagram in mastery task 01
+@startuml
+title Kindle Publishing Service
+class GetPublishingStatusActivity {
++ GetPublishingStatusResponse execute(GetPublishingStatusRequest)
+}
+class SubmitBookForPublishingActivity {
+- PublishingStatusDao publishingStatusDao
++ execute(SubmitBookForPublishingRequest) : SubmitBookForPublishingResponse
+}
+
+class PublishingStatusDao {
+ dynamoDbMapper : DynamoDBMapper
+- {static} String ADDITIONAL_NOTES_PREFIX
++ PublishingStatusItem setPublishingStatus(String,PublishingRecordStatus,String)
++ PublishingStatusItem setPublishingStatus(String,PublishingRecordStatus,String,String)
+}
+
+class PublishingStatusItem {
+@DynamoDBHashKey
+ publishingRecordId : String
+@DynamoDBRangeKey
+ status : PublishingRecordStatus
+- statusMessage : String
+- bookId :  String
++ String getPublishingRecordId()
++ void setPublishingRecordId(String)
++ PublishingRecordStatus getStatus()
++ void setStatus(PublishingRecordStatus)
++ String getStatusMessage()
++ void setStatusMessage(String)
++ String getBookId()
++ void setBookId(String)
+}
+PublishingStatusDao o--o{ PublishingStatusItem
+SubmitBookForPublishingActivity o-- PublishingStatusDao
+GetPublishingStatusActivity o-- PublishingStatusDao
+
+'newpage
+class RecommendationsServiceClient {
+- RecommendationsService recommendationsService
++ List<BookRecommendation> getBookRecommendations(BookGenre)
+}
+class GetBookActivity {
+- RecommendationsServiceClient recommendationServiceClient
+- CatalogDao catalogDao
++ execute(GetBookRequest) :  GetBookResponse
+}
+class RemoveBookFromCatalogActivity {
++ execute(RemoveBookFromCatalogRequest) :  RemoveBookFromCatalogResponse
+}
+class CatalogDao {
+ dynamoDbMapper : DynamoDBMapper
++ CatalogItemVersion getBookFromCatalog(String)
+- CatalogItemVersion getLatestVersionOfBook(String)
+}
+class CatalogItemVersion {
+@DynamoDBHashKey
+ bookId : String
+@DynamoDBRangeKey
+ version : int
+- inactive :  boolean
+- title : String
+- author : String
+- text : String
+- genre : BookGenre
++ String getBookId()
++ void setBookId(String)
++ int getVersion()
++ void setVersion(int)
++ String getTitle()
++ void setTitle(String)
++ String getAuthor()
++ void setAuthor(String)
++ String getText()
++ void setText(String)
++ BookGenre getGenre()
++ void setGenre(BookGenre)
++ boolean isInactive()
++ void setInactive(boolean)
++ String toString()
++ boolean equals(Object)
++ int hashCode()
+}
+
+class PublishingStatusNotFoundException {
+- {static} long serialVersionUID
+}
+class BookNotFoundException {
+- {static} long serialVersionUID
+}
+GetBookActivity o-- RecommendationsServiceClient
+
+
+CatalogDao o--o{ CatalogItemVersion
+CatalogDao o-- BookNotFoundException
+GetBookActivity *-- CatalogDao
+RemoveBookFromCatalogActivity o-- CatalogDao
+
+
+
+RuntimeException <|-- PublishingStatusNotFoundException
+RuntimeException <|-- BookNotFoundException
+@enduml

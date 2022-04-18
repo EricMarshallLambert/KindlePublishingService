@@ -58,4 +58,19 @@ public class CatalogDao {
         }
         return results.get(0);
     }
+
+    /**
+     * Removes a book from the catalog with a given book id.
+     * This deactivates the latest version of the book in the
+     * CatalogItemVersions table by changing its inactive attribute to true.
+     *
+     * @param bookId Id associated with the book.
+     * @return The corresponding CatalogItem from the catalog table.
+     */
+    public CatalogItemVersion removeBookFromCatalog(String bookId) {
+        CatalogItemVersion book = getBookFromCatalog(bookId);
+        book.setInactive(true);
+        dynamoDbMapper.save(book);
+        return book;
+    }
 }

@@ -1,0 +1,16 @@
+Resources:
+  PublishingStatusTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "PublishingStatus"
+      AttributeDefinitions:
+        - AttributeName: "publishingRecordId"
+          AttributeType: "S"
+        - AttributeName: "status"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "publishingRecordId"
+          KeyType: "HASH"
+        - AttributeName: "status"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST

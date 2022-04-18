@@ -21,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class CatalogDaoTest {
@@ -122,6 +121,35 @@ public class CatalogDaoTest {
         assertFalse(book.isInactive(), "Expected book to be active.");
 
         verify(dynamoDbMapper).query(eq(CatalogItemVersion.class), requestCaptor.capture());
+        CatalogItemVersion queriedItem = (CatalogItemVersion) requestCaptor.getValue().getHashKeyValues();
+        assertEquals(bookId, queriedItem.getBookId(), "Expected query to look for provided bookId");
+        assertEquals(1, requestCaptor.getValue().getLimit(), "Expected query to have a limit set");
+    }
+
+    @Test
+    public void removeBookFromCatalog_bookActive_updatesBookInactive() {
+        // GIVEN
+        String bookId = "book.123";
+        CatalogItemVersion item = new CatalogItemVersion();
+        item.setInactive(false);
+        item.setBookId(bookId);
+        item.setVersion(1);
+        ArgumentCaptor<DynamoDBQueryExpression> requestCaptor = ArgumentCaptor.forClass(DynamoDBQueryExpression.class);
+
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(false);
+        when(list.get(0)).thenReturn(item);
+
+        // WHEN
+        CatalogItemVersion book = catalogDao.removeBookFromCatalog(bookId);
+
+        // THEN
+        assertEquals(bookId, book.getBookId());
+        assertEquals(1, book.getVersion(), "Expected version 1 of book to be returned");
+        assertTrue(book.isInactive(), "Expected book to be inactive.");
+
+        verify(dynamoDbMapper).query(eq(CatalogItemVersion.class), requestCaptor.capture());
+        verify(dynamoDbMapper, times(1)).save(item);
         CatalogItemVersion queriedItem = (CatalogItemVersion) requestCaptor.getValue().getHashKeyValues();
         assertEquals(bookId, queriedItem.getBookId(), "Expected query to look for provided bookId");
         assertEquals(1, requestCaptor.getValue().getLimit(), "Expected query to have a limit set");
