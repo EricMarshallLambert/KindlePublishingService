@@ -154,4 +154,19 @@ public class CatalogDaoTest {
         assertEquals(bookId, queriedItem.getBookId(), "Expected query to look for provided bookId");
         assertEquals(1, requestCaptor.getValue().getLimit(), "Expected query to have a limit set");
     }
+
+    @Test
+    public void validateBookExists_withNonExistantBook_throwsBookNotFoundException() {
+        String bookId = "book.123";
+        CatalogItemVersion item = new CatalogItemVersion();
+        item.setInactive(false);
+        item.setBookId(bookId);
+        item.setVersion(1);
+
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(true);
+
+        // WHEN + THEN
+        assertThrows(BookNotFoundException.class, () -> catalogDao.validateBookExists(bookId));
+    }
 }

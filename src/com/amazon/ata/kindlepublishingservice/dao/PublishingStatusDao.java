@@ -3,6 +3,7 @@ package com.amazon.ata.kindlepublishingservice.dao;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.PublishingStatusItem;
 import com.amazon.ata.kindlepublishingservice.enums.PublishingRecordStatus;
 import com.amazon.ata.kindlepublishingservice.exceptions.PublishingStatusNotFoundException;
+import com.amazon.ata.kindlepublishingservice.models.PublishingStatusRecord;
 import com.amazon.ata.kindlepublishingservice.utils.KindlePublishingUtils;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -77,4 +78,40 @@ public class PublishingStatusDao {
         dynamoDbMapper.save(item);
         return item;
     }
+
+    /**
+     * Returns a list of publishing status items corresponding to the specified publishing record ID.
+     *      * Throws a PublishingStatusNotFoundException if the record is not found.
+     *
+     * @param publishingRecordId ID associated with the publishing record.
+     * @return The list of corresponding PublishingStatusItems from the publishing status table.
+     */
+    public List<PublishingStatusItem> getPublishingStatuses(String publishingRecordId) {
+        List<PublishingStatusItem> publishingStatusItems = getPublishingStatusRecords(publishingRecordId);
+
+        if (publishingStatusItems == null) {
+            throw new PublishingStatusNotFoundException(String.format("Publishing record not found for ID: %s",
+                    publishingRecordId));
+        }
+        return publishingStatusItems;
+    }
+
+    // Returns null if no record exists for the provided publishingRecordId
+    public List<PublishingStatusItem> getPublishingStatusRecords(String publishingRecordId) {
+        PublishingStatusItem publishingStatusItem = new PublishingStatusItem();
+        publishingStatusItem.setPublishingRecordId(publishingRecordId);
+
+        DynamoDBQueryExpression<PublishingStatusItem> dbQueryExpression =
+                new DynamoDBQueryExpression<PublishingStatusItem>()
+                .withHashKeyValues(publishingStatusItem);
+
+        List<PublishingStatusItem> publishingStatusItems = dynamoDbMapper.query(PublishingStatusItem.class,
+                dbQueryExpression);
+
+        if (publishingStatusItems.isEmpty()) {
+            return null;
+        }
+        return publishingStatusItems;
+    }
+
 }

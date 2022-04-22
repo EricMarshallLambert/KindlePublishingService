@@ -1,5 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.activity;
 
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazon.ata.kindlepublishingservice.models.requests.SubmitBookForPublishingRequest;
 import com.amazon.ata.kindlepublishingservice.models.response.SubmitBookForPublishingResponse;
@@ -32,6 +33,12 @@ public class SubmitBookForPublishingActivityTest {
     @Mock
     private PublishingStatusDao publishingStatusDao;
 
+    @Mock
+    private CatalogDao catalogDao;
+
+    @Mock
+    private BookPublishRequestManager bookPublishRequestManager;
+
     @InjectMocks
     private SubmitBookForPublishingActivity activity;
 
@@ -56,6 +63,7 @@ public class SubmitBookForPublishingActivityTest {
         when(publishingStatusDao.setPublishingStatus(anyString(),
                 eq(PublishingRecordStatus.QUEUED),
                 eq(request.getBookId()))).thenReturn(item);
+
 
         // WHEN
         SubmitBookForPublishingResponse response = activity.execute(request);
@@ -88,3 +96,4 @@ public class SubmitBookForPublishingActivityTest {
                 "record id.");
     }
 }
+

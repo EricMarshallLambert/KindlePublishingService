@@ -5,6 +5,7 @@ import com.amazon.ata.kindlepublishingservice.enums.PublishingRecordStatus;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
 import com.amazon.ata.kindlepublishingservice.exceptions.PublishingStatusNotFoundException;
 
+import com.amazon.ata.kindlepublishingservice.helpers.KindlePublishingServiceTctTestDao;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
@@ -28,6 +29,15 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class PublishingStatusDaoTest {
+    private static String PUBLISHING_STATUS_ID = "publishingStatus.123";
+    private static PublishingRecordStatus STATUS = PublishingRecordStatus.SUCCESSFUL;
+    private static String BOOK_ID = "book.123";
+    private static String MESSAGE = "Cowabunga!";
+
+    private PublishingStatusItem item;
+
+    @Mock
+    private PaginatedQueryList<PublishingStatusItem> list;
 
     @Mock
     private DynamoDBMapper dynamoDbMapper;
@@ -38,6 +48,11 @@ public class PublishingStatusDaoTest {
     @BeforeEach
     public void setup(){
         initMocks(this);
+        item = new PublishingStatusItem();
+        item.setPublishingRecordId(PUBLISHING_STATUS_ID);
+        item.setStatus(STATUS);
+        item.setStatusMessage(MESSAGE);
+        item.setBookId(BOOK_ID);
     }
 
     @Test
@@ -82,16 +97,14 @@ public class PublishingStatusDaoTest {
     @Test
     public void setPublishingStatus2_additionalMessage_statusSaved() {
         // GIVEN
-        String publishingId = "publishingstatus.123";
-        String bookId = "book.123";
 
         // WHEN
-        PublishingStatusItem status = publishingStatusDao.setPublishingStatus(publishingId,
-                PublishingRecordStatus.FAILED, bookId, "Failed due to...");
+        PublishingStatusItem status = publishingStatusDao.setPublishingStatus(PUBLISHING_STATUS_ID,
+                PublishingRecordStatus.FAILED, BOOK_ID, "Failed due to...");
 
         // THEN
         verify(dynamoDbMapper).save(any(PublishingStatusItem.class));
-        assertEquals(publishingId, status.getPublishingRecordId(), "Expected saved status to have the " +
+        assertEquals(PUBLISHING_STATUS_ID, status.getPublishingRecordId(), "Expected saved status to have the " +
                 "correct publishing status id.");
         assertEquals(PublishingRecordStatus.FAILED, status.getStatus(), "Expected saved status to have" +
                 " the correct publishing status.");
@@ -100,5 +113,39 @@ public class PublishingStatusDaoTest {
                 "included in the status message as 'Additional Notes'");
         assertTrue(status.getStatusMessage().contains("Failed due to..."), "If a message is provided it should be" +
                 "included in the status message.");
+    }
+
+    @Test
+    public void getPublishingStatuses_withPublishingRecordIdExists_returnsPublishingStatusItemList() {
+        //GIVEN
+        ArgumentCaptor<DynamoDBQueryExpression> requestCaptor = ArgumentCaptor.forClass(DynamoDBQueryExpression.class);
+
+        when(dynamoDbMapper.query(eq(PublishingStatusItem.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(false);
+        when(list.get(0)).thenReturn(item);
+
+        //WHEN
+        List<PublishingStatusItem> result = publishingStatusDao.getPublishingStatuses(PUBLISHING_STATUS_ID);
+
+        //THEN
+        assertEquals(result, list);
+
+        verify(dynamoDbMapper).query(eq(PublishingStatusItem.class), requestCaptor.capture());
+        PublishingStatusItem queriedItem = (PublishingStatusItem) requestCaptor.getValue().getHashKeyValues();
+        assertEquals(PUBLISHING_STATUS_ID, queriedItem.getPublishingRecordId(), "Expected query to have same record");
+
+
+    }
+
+    @Test
+    public void getPublishingStatuses_withPublishingRecordIdNonExist_throwsPublishingStatusNotFoundException() {
+        //GIVEN
+        when(dynamoDbMapper.query(eq(PublishingStatusItem.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(true);
+        when(list.get(0)).thenReturn(item);
+
+        //WHEN + THEN
+        assertThrows(PublishingStatusNotFoundException.class, ()-> publishingStatusDao.
+                getPublishingStatuses(PUBLISHING_STATUS_ID));
     }
 }

@@ -189,7 +189,7 @@ SubmitBookForPublishingResponse {
 * When a `SUCCESSFUL` `PublishingStatus` has been reached, the `PublishingStatusRecord` should
     contain a `bookId`. If the publishing request was for an existing book, each
     `PublishingStatusRecord` will have a `bookId`.
-* Throws a `PublishingRecordFoundException` when the provided `publishingRecordId` is not found in
+* Throws a `PublishingStatusNotFoundException` when the provided `publishingRecordId` is not found in
     the `PublishingStatus` table.
 * We have configured the API to require a non-empty publishing record ID in the request, otherwise  a
 `ValidationException` will be thrown. You do not have to account for this.
