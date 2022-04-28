@@ -81,4 +81,46 @@ public class CatalogDao {
             throw new BookNotFoundException(String.format("No book found for id: %s", bookId));
         }
     }
+
+    /**
+     * Adds the new book to the CatalogItemVersion table.
+     * If this request is updating an existing book:
+     * The entry in CatalogItemVersion will use the same bookId but with the version incremented by 1.
+     * The previously active version of the book will be marked inactive.
+     * Otherwise, a new bookId is generated for the book and the book will be stored in CatalogItemVersion as version 1.
+     *
+     * @param kindleFormattedBook A book to create or update.
+     * @return CatalogItemVersion
+     */
+    public CatalogItemVersion createOrUpdateBook(KindleFormattedBook kindleFormattedBook) {
+            String bookId = kindleFormattedBook.getBookId();
+
+            CatalogItemVersion book = new CatalogItemVersion();
+            book.setAuthor(kindleFormattedBook.getAuthor());
+            book.setGenre(kindleFormattedBook.getGenre());
+            book.setInactive(false);
+            book.setText(kindleFormattedBook.getText());
+            book.setTitle(kindleFormattedBook.getTitle());
+
+        if (bookId == null) {
+            String generatedBookId = KindlePublishingUtils.generateBookId();
+            book.setBookId(generatedBookId);
+            book.setVersion(1);
+            dynamoDbMapper.save(book);
+            return book;
+        }
+
+        try {
+            CatalogItemVersion previousVersion = getBookFromCatalog(bookId);
+            book.setBookId(bookId);
+            book.setVersion(previousVersion.getVersion() + 1);
+            previousVersion.setInactive(true);
+            dynamoDbMapper.save(previousVersion);
+            dynamoDbMapper.save(book);
+        } catch (BookNotFoundException e) {
+            throw new BookNotFoundException("Previous version not found or inactive.");
+        }
+
+        return book;
+    }
 }

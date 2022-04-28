@@ -52,21 +52,20 @@ public class SubmitBookForPublishingActivity {
      * to check the publishing state of the book.
      */
     public SubmitBookForPublishingResponse execute(SubmitBookForPublishingRequest request) {
-        final BookPublishRequest bookPublishRequest = BookPublishRequestConverter.toBookPublishRequest(request);
-        String bookId = bookPublishRequest.getBookId();
-
-        if (bookId != null) {
-            catalogDao.validateBookExists(bookId);
+        String requestBookId = request.getBookId();
+        //validate book ID
+        if (requestBookId != null) {
+            catalogDao.validateBookExists(requestBookId);
         }
+        //convert book
+        final BookPublishRequest bookPublishRequest = BookPublishRequestConverter.toBookPublishRequest(request);
 
         // Submit the BookPublishRequest for processing
         bookPublishRequestManager.addBookPublishRequest(bookPublishRequest);
 
-        String publishingRecordId = KindlePublishingUtils.generatePublishingRecordId();
-//        PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(bookPublishRequest.getPublishingRecordId(),
-        PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(publishingRecordId,
+        PublishingStatusItem item =  publishingStatusDao.setPublishingStatus(bookPublishRequest.getPublishingRecordId(),
                 PublishingRecordStatus.QUEUED,
-                bookId);
+                bookPublishRequest.getBookId());
 
         return SubmitBookForPublishingResponse.builder()
                 .withPublishingRecordId(item.getPublishingRecordId())

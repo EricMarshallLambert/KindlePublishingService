@@ -169,4 +169,85 @@ public class CatalogDaoTest {
         // WHEN + THEN
         assertThrows(BookNotFoundException.class, () -> catalogDao.validateBookExists(bookId));
     }
+
+    @Test
+    public void createOrUpdateBook_withKindleFormattedBookNewBook_returnsCatalogItemVersion() {
+        //GIVEN
+        int version = 1;
+        CatalogItemVersion catalogItemVersion = new CatalogItemVersion();
+        catalogItemVersion.setAuthor("Ray Kurzweil");
+        catalogItemVersion.setGenre(BookGenre.COOKING);
+        catalogItemVersion.setText("text");
+        catalogItemVersion.setTitle("The Age of Intelligent Machines");
+        catalogItemVersion.setVersion(version);
+        catalogItemVersion.setInactive(false);
+
+        KindleFormattedBook kindleFormattedBook = KindleFormattedBook.builder()
+                .withAuthor("Ray Kurzweil")
+                .withGenre(BookGenre.COOKING)
+                .withText("text")
+                .withTitle("The Age of Intelligent Machines")
+                .build();
+        //WHEN
+        CatalogItemVersion resultBook = catalogDao.createOrUpdateBook(kindleFormattedBook);
+        //THEN
+        verify(dynamoDbMapper, times(1)).save(any(CatalogItemVersion.class));
+        assertEquals(catalogItemVersion.getVersion(), resultBook.getVersion());
+        assertFalse(resultBook.isInactive());
+        assertNotNull(resultBook.getBookId());
+    }
+
+    @Test
+    public void createOrUpdateBook_withKindleFormattedBookOldBook_returnsCatalogItemVersion() {
+        //GIVEN
+        int version = 1;
+        CatalogItemVersion catalogItemVersion = new CatalogItemVersion();
+        catalogItemVersion.setBookId("1234");
+        catalogItemVersion.setAuthor("Ray Kurzweil");
+        catalogItemVersion.setGenre(BookGenre.COOKING);
+        catalogItemVersion.setText("text");
+        catalogItemVersion.setTitle("The Age of Intelligent Machines");
+        catalogItemVersion.setVersion(version);
+        catalogItemVersion.setInactive(false);
+
+        KindleFormattedBook kindleFormattedBook = KindleFormattedBook.builder()
+                .withBookId("1234")
+                .withAuthor("Ray Kurzweil")
+                .withGenre(BookGenre.COOKING)
+                .withText("text")
+                .withTitle("The Age of Intelligent Machines")
+                .build();
+        ArgumentCaptor<DynamoDBQueryExpression> requestCaptor = ArgumentCaptor.forClass(DynamoDBQueryExpression.class);
+
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(false);
+        when(list.get(0)).thenReturn(catalogItemVersion);
+        //WHEN
+        CatalogItemVersion resultBook = catalogDao.createOrUpdateBook(kindleFormattedBook);
+        //THEN
+        verify(dynamoDbMapper).query(eq(CatalogItemVersion.class), requestCaptor.capture());
+        verify(dynamoDbMapper, times(2)).save(any(CatalogItemVersion.class));
+        CatalogItemVersion queriedItem = (CatalogItemVersion) requestCaptor.getValue().getHashKeyValues();
+        assertEquals(queriedItem.getBookId(), resultBook.getBookId());
+        assertEquals(catalogItemVersion.getVersion() + 1, resultBook.getVersion());
+        assertFalse(resultBook.isInactive());
+    }
+
+    @Test
+    public void createOrUpdateBook_withKindleFormattedBookNoBook_throwsBookNotFound() {
+        //GIVEN
+        KindleFormattedBook kindleFormattedBook = KindleFormattedBook.builder()
+                .withBookId("1234")
+                .withAuthor("Ray Kurzweil")
+                .withGenre(BookGenre.COOKING)
+                .withText("text")
+                .withTitle("The Age of Intelligent Machines")
+                .build();
+
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(true);
+
+        //WHEN + THEN
+        assertThrows(BookNotFoundException.class, ()->catalogDao.createOrUpdateBook(kindleFormattedBook));
+    }
 }

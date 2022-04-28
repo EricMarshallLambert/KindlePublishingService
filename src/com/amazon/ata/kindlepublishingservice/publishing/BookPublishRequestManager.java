@@ -1,28 +1,44 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
 import javax.inject.Inject;
-import java.util.LinkedList;
+import javax.inject.Singleton;
+
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-//@Singleton
+/**
+ * Instantiates a BookPublishRequestManager to manage the queue of publish requests.
+ */
+@Singleton
 public class BookPublishRequestManager {
-    private Queue<BookPublishRequest> bookPublishRequestQueue;
+    private final Queue<BookPublishRequest> bookPublishRequestQueue;
 
+    /**
+     *Instantiates a BookPublishRequestManager to manage the queue of publish requests.
+     *
+     * @param queue A thread safe queue
+     */
     @Inject
-//    do I need any dependencies
-    public BookPublishRequestManager() {
-        this.bookPublishRequestQueue = new LinkedList<>();
+    public BookPublishRequestManager(ConcurrentLinkedQueue queue) {
+        this.bookPublishRequestQueue = new ConcurrentLinkedQueue<>(queue);
     }
 
-    public void addBookPublishRequest(BookPublishRequest bookPublishRequest) {
+    /**
+     * Adds a BookPublishRequest to the concurrent linked queue.
+     *
+     * @param bookPublishRequest
+     */
+    public void addBookPublishRequest(final BookPublishRequest bookPublishRequest) {
         bookPublishRequestQueue.add(bookPublishRequest);
     }
 
+    /**
+     * Gets a book and removes the head of this queue.
+     *
+     * @return BookPublishRequest or null if this queue is empty.
+     */
     public BookPublishRequest getBookPublishRequestToProcess() {
-        if (!bookPublishRequestQueue.isEmpty()) {
-            return bookPublishRequestQueue.remove();
-        }
-        return null;
+           return bookPublishRequestQueue.poll();
     }
 
     public Queue<BookPublishRequest> getBookPublishRequestQueue() {

@@ -4,11 +4,13 @@ package com.amazon.ata.kindlepublishingservice.publishing;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BookPublishRequestManagerTest {
 
-    private BookPublishRequestManager publishRequestManager = new BookPublishRequestManager();
+    private BookPublishRequestManager publishRequestManager = new BookPublishRequestManager(new ConcurrentLinkedQueue());
 
     @Test
     public void addBookPublishRequest_withBookPublishRequest_addedToQueue() {

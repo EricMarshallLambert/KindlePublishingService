@@ -113,5 +113,4 @@ public class PublishingStatusDao {
         }
         return publishingStatusItems;
     }
-
 }
