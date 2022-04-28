@@ -1,4 +1,6 @@
-package com.amazon.ata.kindlepublishingservice.publishing;
+package com.amazon.ata.kindlepublishingservice.dagger;
+
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequest;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

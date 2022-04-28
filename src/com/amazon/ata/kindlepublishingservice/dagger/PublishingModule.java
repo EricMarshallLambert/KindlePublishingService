@@ -1,6 +1,5 @@
 package com.amazon.ata.kindlepublishingservice.dagger;
 
-import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 import com.amazon.ata.kindlepublishingservice.publishing.BookPublishTask;
 import com.amazon.ata.kindlepublishingservice.publishing.BookPublisher;
 
@@ -28,6 +27,8 @@ public class PublishingModule {
         return Executors.newScheduledThreadPool(1);
     }
 
+
+    //Franks way
     @Provides
     @Singleton
     public BookPublishRequestManager provideBookPublishRequestManager() {

@@ -1,5 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.converters;
 
+import com.amazon.ata.coral.converter.CoralConverterUtil;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.PublishingStatusItem;
 import com.amazon.ata.kindlepublishingservice.models.PublishingStatusRecord;
 
@@ -33,10 +34,13 @@ public class PublishingStatusConverter {
     public static List<PublishingStatusRecord> toPublishingStatusRecordList(
             List<PublishingStatusItem> publishingStatusItems) {
 
-        List<PublishingStatusRecord> publishingStatusRecords = new LinkedList<>();
-        for (PublishingStatusItem publishingStatusItem : publishingStatusItems) {
-            publishingStatusRecords.add(toPublishingStatusRecord(publishingStatusItem));
-        }
-        return publishingStatusRecords;
+//        List<PublishingStatusRecord> publishingStatusRecords = new LinkedList<>();
+//        for (PublishingStatusItem publishingStatusItem : publishingStatusItems) {
+//            publishingStatusRecords.add(toPublishingStatusRecord(publishingStatusItem));
+//        }
+
+        return CoralConverterUtil.convertList(publishingStatusItems,
+                PublishingStatusConverter::toPublishingStatusRecord);
+//        return publishingStatusRecords;
     }
 }

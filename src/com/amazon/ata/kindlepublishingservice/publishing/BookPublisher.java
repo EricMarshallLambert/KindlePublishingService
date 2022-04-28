@@ -13,7 +13,7 @@ import javax.inject.Singleton;
  * Class responsible for executing publishing tasks. The publisher is created in an off state. A call to start will
  * start the publishing process.
  */
-@Singleton
+//@Singleton
 public class BookPublisher {
 
     private static final Logger log = LogManager.getLogger(BookPublisher.class);
