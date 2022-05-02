@@ -1,4 +1,4 @@
-package com.amazon.ata.kindlepublishingservice.dagger;
+package com.amazon.ata.kindlepublishingservice.publishing;
 
 import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequest;
 

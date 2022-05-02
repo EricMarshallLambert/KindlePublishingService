@@ -1,6 +1,4 @@
-package com.amazon.ata.kindlepublishingservice.dagger;
-
-import com.amazon.ata.kindlepublishingservice.publishing.BookPublisher;
+package com.amazon.ata.kindlepublishingservice.publishing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

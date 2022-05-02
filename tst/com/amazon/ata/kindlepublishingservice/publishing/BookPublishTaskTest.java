@@ -1,6 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
-import com.amazon.ata.kindlepublishingservice.dagger.BookPublishRequestManager;
+import com.amazon.ata.kindlepublishingservice.converters.KindleFormatConverter;
 import com.amazon.ata.kindlepublishingservice.dao.CatalogDao;
 import com.amazon.ata.kindlepublishingservice.dao.PublishingStatusDao;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;

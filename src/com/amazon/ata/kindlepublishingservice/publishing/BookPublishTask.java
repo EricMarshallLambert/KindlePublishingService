@@ -1,6 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
-import com.amazon.ata.kindlepublishingservice.dagger.BookPublishRequestManager;
+import com.amazon.ata.kindlepublishingservice.converters.KindleFormatConverter;
 import com.amazon.ata.kindlepublishingservice.dao.CatalogDao;
 import com.amazon.ata.kindlepublishingservice.dao.PublishingStatusDao;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
@@ -15,7 +15,7 @@ import javax.inject.Inject;
  * A runnable class for asynchronous processing of book publish tasks.
  */
 public class BookPublishTask implements Runnable{
-    private static final Logger LOGGER = LogManager.getLogger(BookPublishTask.class);
+   private static final Logger LOGGER = LogManager.getLogger(BookPublishTask.class);
    private BookPublishRequestManager bookPublishRequestManager;
    private PublishingStatusDao publishingStatusDao;
    private CatalogDao catalogDao;

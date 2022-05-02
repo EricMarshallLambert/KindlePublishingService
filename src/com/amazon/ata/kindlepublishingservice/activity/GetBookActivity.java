@@ -1,16 +1,18 @@
 package com.amazon.ata.kindlepublishingservice.activity;
 
-import com.amazon.ata.kindlepublishingservice.clients.RecommendationsServiceClient;
+import com.amazon.ata.kindlepublishingservice.clients.CachingRecommendationsServiceClient;
+import com.amazon.ata.kindlepublishingservice.clients.RecommendationsServiceable;
 import com.amazon.ata.kindlepublishingservice.converters.CatalogItemConverter;
-import com.amazon.ata.recommendationsservice.types.BookGenre;
+import com.amazon.ata.kindlepublishingservice.metrics.MetricsConstants;
+import com.amazon.ata.kindlepublishingservice.metrics.MetricsPublisher;
+import com.amazon.ata.kindlepublishingservice.models.requests.BookRecommendationsRequest;
 import com.amazon.ata.kindlepublishingservice.models.requests.GetBookRequest;
 import com.amazon.ata.kindlepublishingservice.models.response.GetBookResponse;
 import com.amazon.ata.kindlepublishingservice.converters.RecommendationsCoralConverter;
 import com.amazon.ata.kindlepublishingservice.dao.CatalogDao;
 import com.amazon.ata.kindlepublishingservice.dynamodb.models.CatalogItemVersion;
 import com.amazon.ata.recommendationsservice.types.BookRecommendation;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.cloudwatch.model.StandardUnit;
 
 import java.util.List;
 import javax.inject.Inject;
@@ -21,21 +23,25 @@ import javax.inject.Inject;
  *
  * This API allows the client to retrieve a book.
  */
-
 public class GetBookActivity {
-    private RecommendationsServiceClient recommendationServiceClient;
+
+    private final RecommendationsServiceable recommendationsServiceClient;
+    private final MetricsPublisher metricsPublisher;
+
     private CatalogDao catalogDao;
 
     /**
      * Instantiates a new GetBookActivity object.
      *
      * @param catalogDao CatalogDao to access the Catalog table.
-     * @param recommendationServiceClient Returns recommendations based on genre.
+     * @param recommendationsServiceClient Returns recommendations based on genre.
      */
     @Inject
-    public GetBookActivity(CatalogDao catalogDao, RecommendationsServiceClient recommendationServiceClient) {
+    public GetBookActivity(CatalogDao catalogDao, CachingRecommendationsServiceClient recommendationsServiceClient,
+                           MetricsPublisher metricsPublisher) {
         this.catalogDao = catalogDao;
-        this.recommendationServiceClient = recommendationServiceClient;
+        this.recommendationsServiceClient = recommendationsServiceClient;
+        this.metricsPublisher = metricsPublisher;
     }
 
     /**
@@ -46,9 +52,17 @@ public class GetBookActivity {
      */
 
     public GetBookResponse execute(final GetBookRequest request) {
+        metricsPublisher.addMetric(MetricsConstants.GET_BOOK_REQUEST, 1, StandardUnit.Count);
+
         CatalogItemVersion catalogItem = catalogDao.getBookFromCatalog(request.getBookId());
-        List<BookRecommendation> recommendations = recommendationServiceClient.getBookRecommendations(
-            BookGenre.valueOf(catalogItem.getGenre().name()));
+        //use cache here
+        BookRecommendationsRequest bookRecommendationsRequest = new BookRecommendationsRequest(catalogItem.getGenre());
+
+
+        List<BookRecommendation> recommendations = recommendationsServiceClient
+                .getBookRecommendations(bookRecommendationsRequest);
+
+
         return GetBookResponse.builder()
             .withBook(CatalogItemConverter.toBook(catalogItem))
             .withRecommendations(RecommendationsCoralConverter.toCoral(recommendations))

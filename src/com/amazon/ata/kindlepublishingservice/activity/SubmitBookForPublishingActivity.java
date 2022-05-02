@@ -9,7 +9,7 @@ import com.amazon.ata.kindlepublishingservice.dynamodb.models.PublishingStatusIt
 import com.amazon.ata.kindlepublishingservice.enums.PublishingRecordStatus;
 import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequest;
 
-import com.amazon.ata.kindlepublishingservice.dagger.BookPublishRequestManager;
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequestManager;
 
 import javax.inject.Inject;
 

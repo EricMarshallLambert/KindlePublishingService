@@ -1,5 +1,8 @@
 package com.amazon.ata.kindlepublishingservice.activity;
 
+import com.amazon.ata.kindlepublishingservice.dagger.ApplicationComponent;
+import com.amazon.ata.kindlepublishingservice.dagger.DaggerApplicationComponent;
+import com.amazon.ata.kindlepublishingservice.publishing.ATAKindlePublishingServiceManager;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 import com.amazon.ata.kindlepublishingservice.models.Book;
 import com.amazon.ata.kindlepublishingservice.models.requests.GetBookRequest;
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class GetBookActivityTest {
+//    private static final ApplicationComponent COMPONENT = DaggerApplicationComponent.create();
 
     private static String BOOK_ID = "book.123";
     private static final String TITLE = "Title of Book";
@@ -43,6 +47,12 @@ public class GetBookActivityTest {
     @BeforeEach
     public void setup(){
         initMocks(this);
+//        ATAKindlePublishingServiceManager publishingManager = COMPONENT.provideATAKindlePublishingServiceManager();
+//        try {
+//            publishingManager.start();
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
     }
 
     @Test

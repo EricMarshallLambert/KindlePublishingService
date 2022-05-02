@@ -1,0 +1,23 @@
+{
+  "widgets": [
+    {
+      "height": 3,
+      "width": 18,
+      "y": 0,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [ { "expression": "(m1 - m2 )/ m1 * 100", "label": "Recommendations Cache Hit Rate'", "id": "e1", "region": "us-east-1", "stat": "Sum" } ],
+          [ "Unit6Metrics", "Recommendations Cache Call", "Marketplace", "US", "Service", "KindlePublishingService", { "region": "us-west-2", "id": "m1" } ],
+          [ ".", "Recommendations Service Call", ".", ".", ".", ".", { "region": "us-west-2", "id": "m2" } ]
+        ],
+        "view": "singleValue",
+        "region": "us-east-1",
+        "stat": "Sum",
+        "period": 300,
+        "title": "Recommendations Cache Hit Rate'"
+      }
+    }
+  ]
+}

@@ -1,6 +1,8 @@
-package com.amazon.ata.kindlepublishingservice.publishing;
+package com.amazon.ata.kindlepublishingservice.converters;
 
 import com.amazon.ata.kindlepublishing.utils.KindleConversionUtils;
+import com.amazon.ata.kindlepublishingservice.publishing.BookPublishRequest;
+import com.amazon.ata.kindlepublishingservice.publishing.KindleFormattedBook;
 
 /**
  * Contains methods that help convert a book to its Kindle format.

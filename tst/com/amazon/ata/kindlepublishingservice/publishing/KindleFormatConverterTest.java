@@ -1,5 +1,6 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
+import com.amazon.ata.kindlepublishingservice.converters.KindleFormatConverter;
 import com.amazon.ata.recommendationsservice.types.BookGenre;
 
 import org.junit.jupiter.api.Test;
